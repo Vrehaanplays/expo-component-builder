@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/components/PhoneFrame";
 import { BottomNav } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/home")({
@@ -10,7 +10,6 @@ export const Route = createFileRoute("/home")({
 function Home() {
   return (
     <PhoneFrame>
-      <StatusBar />
 
       <header className="flex flex-shrink-0 items-center justify-between px-6 pb-5 pt-4">
         <div

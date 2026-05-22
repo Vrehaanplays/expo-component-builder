@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/components/PhoneFrame";
 
 export const Route = createFileRoute("/auth")({
   component: Auth,
@@ -12,7 +12,6 @@ function Auth() {
 
   return (
     <PhoneFrame>
-      <StatusBar />
       <div className="flex flex-1 flex-col justify-end px-6 pb-8 pt-8">
         <h1 className="mb-1.5 text-[28px] font-bold tracking-[-0.04em] text-[var(--ghost)]">
           Create account

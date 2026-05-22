@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/components/PhoneFrame";
 
 export const Route = createFileRoute("/scenario")({
   component: Scenario,
@@ -43,7 +43,6 @@ function Scenario() {
 
   return (
     <PhoneFrame>
-      <StatusBar />
 
       <div className="flex flex-shrink-0 items-center gap-3 px-6 py-4">
         <button
