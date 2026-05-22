@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/components/PhoneFrame";
 import { BottomNav } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/leaderboard")({
@@ -27,7 +27,6 @@ function Leaderboard() {
 
   return (
     <PhoneFrame>
-      <StatusBar />
       <div className="flex-shrink-0 px-6 pb-4 pt-5">
         <h1 className="mb-4 text-[22px] font-bold tracking-[-0.03em] text-[var(--ghost)]">
           Leaderboard

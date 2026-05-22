@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/components/PhoneFrame";
 import { BottomNav } from "@/components/BottomNav";
 
 export const Route = createFileRoute("/home")({
@@ -10,7 +10,6 @@ export const Route = createFileRoute("/home")({
 function Home() {
   return (
     <PhoneFrame>
-      <StatusBar />
 
       <header className="flex flex-shrink-0 items-center justify-between px-6 pb-5 pt-4">
         <div
@@ -50,14 +49,7 @@ function Home() {
           </h3>
           <div className="flex items-center justify-between">
             <span className="text-xs text-[var(--muted)]">🧑 2,341 played today</span>
-            <div className="flex gap-[3px]">
-              <span className="h-1.5 w-1.5 rounded-[3px]" style={{ background: "var(--strike)" }} />
-              <span className="h-1.5 w-1.5 rounded-[3px]" style={{ background: "var(--strike)" }} />
-              <span
-                className="h-1.5 w-1.5 rounded-[3px]"
-                style={{ background: "var(--surface2)" }}
-              />
-            </div>
+            <span className="text-xs font-semibold text-[var(--strike)]">Tap to start →</span>
           </div>
         </Link>
 

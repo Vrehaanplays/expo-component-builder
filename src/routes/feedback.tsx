@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
-import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/components/PhoneFrame";
 
 const searchSchema = z.object({ correct: z.number().optional().default(1) });
 
@@ -17,7 +17,6 @@ function Feedback() {
 
   return (
     <PhoneFrame>
-      <StatusBar />
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-8 text-center">
         <div
           className="mb-5 flex h-[88px] w-[88px] items-center justify-center rounded-[24px] text-[40px]"
