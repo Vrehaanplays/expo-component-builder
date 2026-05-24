@@ -1,7 +1,6 @@
 import tailwindcss from "@tailwindcss/vite";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
-
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import { fileURLToPath, URL } from "node:url";
 import { defineConfig } from "vite";
 import tsConfigPaths from "vite-tsconfig-paths";
@@ -9,20 +8,8 @@ import tsConfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   plugins: [
     tailwindcss(),
+    TanStackRouterVite({ autoCodeSplitting: true }),
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
-    tanstackStart({
-      server: {
-        preset: "vercel",
-      },
-      importProtection: {
-        behavior: "error",
-        client: {
-          files: ["**/server/**"],
-          specifiers: ["server-only"],
-        },
-      },
-    }),
-
     viteReact(),
   ],
   resolve: {
