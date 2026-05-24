@@ -21,15 +21,46 @@ function Splash() {
 
   return (
     <PhoneFrame>
-      <div className="flex h-full flex-col items-center justify-center gap-4">
-        <div
-          className="flex h-[72px] w-[72px] items-center justify-center rounded-[20px] text-[32px] font-bold"
-          style={{ background: "var(--strike)", color: "var(--void)" }}
-        >
-          G
+      <div className="flex h-full flex-col items-center justify-center gap-5">
+        {/* Logo mark */}
+        <div className="relative">
+          <div
+            className="absolute inset-0 rounded-[28px] blur-[28px] opacity-50"
+            style={{ background: "var(--accent-arctic)" }}
+          />
+          <div
+            className="relative flex h-[88px] w-[88px] items-center justify-center rounded-[28px] text-[40px] font-bold"
+            style={{
+              background: "linear-gradient(135deg, var(--accent-arctic) 0%, #3DD4C8 100%)",
+              color: "var(--depth-abyss)",
+              boxShadow: "0 8px 32px rgba(74,234,220,0.35)",
+            }}
+          >
+            G
+          </div>
         </div>
-        <h1 className="text-[28px] font-bold tracking-[-0.04em] text-[var(--ghost)]">GMJ</h1>
-        <p className="text-sm tracking-wide text-[var(--muted)]">Train your judgment.</p>
+
+        <div className="text-center">
+          <h1 className="gmj-display text-[36px]">GMJ</h1>
+          <p className="mt-2 text-[15px] tracking-wide text-[var(--text-secondary)]">
+            Train your judgment.
+          </p>
+        </div>
+
+        {/* Loading dots */}
+        <div className="mt-4 flex gap-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-1.5 w-1.5 rounded-full bg-[var(--accent-arctic)]"
+              style={{
+                animation: `twinkle 1.2s ease-in-out infinite`,
+                animationDelay: `${i * 0.2}s`,
+                opacity: 0.6,
+              }}
+            />
+          ))}
+        </div>
       </div>
     </PhoneFrame>
   );
