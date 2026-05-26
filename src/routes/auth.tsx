@@ -37,8 +37,14 @@ function Auth() {
   const handleGoogle = async () => {
     setError(null);
     const { error: err } = await signInWithGoogle();
-    if (err) setError(err.message);
-    // Google redirects automatically — no navigate needed
+    if (err) {
+      if (err.message.includes('provider') || err.message.includes('not enabled') || err.message.includes('Unsupported')) {
+        setError('Google Sign-in isn\'t configured yet. Use email instead.');
+      } else {
+        setError(err.message);
+      }
+    }
+    // On success Google redirects automatically
   };
 
   return (
