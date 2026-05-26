@@ -1,6 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
 import { BottomNav } from "@/components/BottomNav";
+import { useAuthContext } from "@/lib/auth-context";
+import { useProfile } from "@/hooks/use-profile";
 
 export const Route = createFileRoute("/home")({
   component: Home,
@@ -8,18 +11,34 @@ export const Route = createFileRoute("/home")({
 });
 
 function Home() {
+  const navigate = useNavigate();
+  const { user, session, loading: authLoading } = useAuthContext();
+  const { profile, loading: profileLoading } = useProfile(user?.id);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !session) navigate({ to: "/auth" });
+  }, [authLoading, session, navigate]);
+
+  const streak = profile?.current_streak ?? 0;
+  const shards = profile?.total_shards ?? 0;
+  const rank = profile?.rank_position;
+  const isLoading = authLoading || profileLoading;
+
   return (
     <PhoneFrame>
       <StatusBar />
-      
+
       <header className="gmj-float gmj-float-d1 flex flex-shrink-0 items-center justify-between px-6 pb-5 pt-2">
         <div className="gmj-streak">
           <span className="text-[14px]">🔥</span>
-          <span>7 day streak</span>
+          <span>{isLoading ? "—" : `${streak} day streak`}</span>
         </div>
         <div className="text-right">
-          <div className="gmj-stat-num text-[22px]">4,820</div>
-          <div className="gmj-stat-label">Total pts</div>
+          <div className="gmj-stat-num text-[22px]">
+            {isLoading ? "—" : shards.toLocaleString()}
+          </div>
+          <div className="gmj-stat-label">Total ⚡</div>
         </div>
       </header>
 
@@ -60,11 +79,13 @@ function Home() {
         >
           <div>
             <div className="text-[12px] text-[var(--txt-ghost)]">Your global rank</div>
-            <div className="gmj-stat-num text-[20px]">#142</div>
+            <div className="gmj-stat-num text-[20px]">
+              {isLoading ? "—" : rank ? `#${rank}` : "Unranked"}
+            </div>
           </div>
           <div className="gmj-rank-pill">
             <span className="text-[14px]">▲</span>
-            <span>14 today</span>
+            <span>Play to rank</span>
           </div>
         </Link>
 

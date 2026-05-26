@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { PhoneFrame } from "@/components/PhoneFrame";
+import { useAuthContext } from "@/lib/auth-context";
 
 export const Route = createFileRoute("/")({
   component: Splash,
@@ -14,10 +15,15 @@ export const Route = createFileRoute("/")({
 
 function Splash() {
   const navigate = useNavigate();
+  const { session, loading } = useAuthContext();
+
   useEffect(() => {
-    const t = setTimeout(() => navigate({ to: "/onboarding" }), 1800);
+    if (loading) return;
+    const t = setTimeout(() => {
+      navigate({ to: session ? "/home" : "/onboarding" });
+    }, 1800);
     return () => clearTimeout(t);
-  }, [navigate]);
+  }, [navigate, session, loading]);
 
   return (
     <PhoneFrame>
