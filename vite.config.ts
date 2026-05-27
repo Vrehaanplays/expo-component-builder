@@ -18,5 +18,5 @@ export default defineConfig({
     },
     dedupe: ["react", "react-dom", "@tanstack/react-query", "@tanstack/query-core"],
   },
-  server: { host: "::", port: 8080 },
+  server: { host: "::", port: 3000 },
 });
