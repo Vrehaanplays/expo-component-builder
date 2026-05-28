@@ -1,1 +1,0 @@
-import{j as e}from"./index-BgFV08f-.js";function m({children:s}){return e.jsx("div",{className:"gmj-stage",children:e.jsx("div",{className:"gmj-device",children:e.jsx("div",{className:"gmj-screen",children:s})})})}export{m as P};
