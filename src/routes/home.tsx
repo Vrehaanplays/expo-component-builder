@@ -5,7 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { useAuthContext } from "@/lib/auth-context";
 import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/lib/supabase";
-import { getOrCreateDailyScenario, getLocalDateString, hasPlayedScenario, getScenarioSessionCount } from "@/lib/game-service";
+import { getOrCreateDailyScenario, getLocalDateString, hasPlayedScenario, getScenarioSessionCount, getRankTier } from "@/lib/game-service";
 import {
   AlertDialog,
   AlertDialogContent,
