@@ -74,19 +74,67 @@ returns void as $$
 begin
   delete from auth.users where email like '%@mock.gmj.com';
 end;
-$$ language plpgsql security definer;`;
-
-function DebugDashboard() {
+$$ language plpgsql security definer;`;function DebugDashboard() {
   const navigate = useNavigate();
   const { user, session, loading: authLoading } = useAuthContext();
   const { profile, refetch } = useProfile(user?.id);
   const [status, setStatus] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loginMsg, setLoginMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && !session) navigate({ to: "/auth" });
-  }, [authLoading, session, navigate]);
+  // We DO NOT redirect to /auth if there is no session.
+  // This allows the debug page to be loaded directly when logged out.
+
+  const handleQuickLogin = async () => {
+    setStatus(null);
+    setErrorMsg(null);
+    setLoginMsg("Attempting quick login...");
+    setLoading(true);
+    try {
+      const testEmail = "tester@gmj.com";
+      const testPass = "password123";
+      
+      const { error } = await supabase.auth.signInWithPassword({
+        email: testEmail,
+        password: testPass,
+      });
+
+      if (error) {
+        if (error.message.includes("Invalid login credentials") || error.message.includes("Email not confirmed")) {
+          setLoginMsg("Test account not found. Creating a new one...");
+          const { error: signUpErr } = await supabase.auth.signUp({
+            email: testEmail,
+            password: testPass,
+            options: { data: { username: "ArenaTester" } }
+          });
+          
+          if (signUpErr) throw signUpErr;
+          
+          const { error: signInErr } = await supabase.auth.signInWithPassword({
+            email: testEmail,
+            password: testPass,
+          });
+          
+          if (signInErr) throw signInErr;
+          setLoginMsg("Registered and logged in as ArenaTester!");
+        } else {
+          throw error;
+        }
+      } else {
+        setLoginMsg("Logged in successfully as tester!");
+      }
+      
+      await refetch();
+      setTimeout(() => navigate({ to: "/home" }), 1000);
+    } catch (e: any) {
+      console.error(e);
+      setErrorMsg(e.message || "Quick login failed.");
+      setLoginMsg(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSeed = async () => {
     setStatus(null);
@@ -136,7 +184,6 @@ function DebugDashboard() {
     setErrorMsg(null);
     setLoading(true);
     try {
-      // 1. Delete user's sessions (requires delete policy)
       const { error: deleteErr } = await supabase
         .from("sessions")
         .delete()
@@ -151,7 +198,6 @@ function DebugDashboard() {
         return;
       }
 
-      // 2. Reset user's profile stats
       const { error: profileErr } = await supabase
         .from("profiles")
         .update({
@@ -181,11 +227,10 @@ function DebugDashboard() {
     setErrorMsg(null);
     setLoading(true);
     try {
-      // Delete today and tomorrow challenges to trigger regeneration
       const { error } = await supabase
         .from("daily_challenges")
         .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000"); // deletes all
+        .neq("id", "00000000-0000-0000-0000-000000000000");
 
       if (error) throw error;
       setStatus("Daily challenge mappings cleared! Returning home will generate fresh scenarios.");
@@ -223,7 +268,7 @@ function DebugDashboard() {
       <StatusBar />
       <div className="flex flex-shrink-0 items-center justify-between px-6 py-4">
         <Link
-          to="/profile"
+          to={user ? "/profile" : "/auth"}
           className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[var(--glass-bg)] border border-[var(--glass-border)] text-xl text-[var(--txt-primary)] transition-all active:scale-95 text-decoration-none"
         >
           ←
@@ -245,28 +290,57 @@ function DebugDashboard() {
           </div>
         )}
 
+        {!user && (
+          <div className="mb-6 rounded-[20px] bg-[rgba(59,130,246,0.08)] border border-[rgba(59,130,246,0.25)] p-5 text-left">
+            <div className="text-[12px] uppercase font-bold tracking-wider text-[var(--color-arctic)] mb-2">
+              🔑 Quick Test Login (Auth Bypass)
+            </div>
+            <p className="text-[13px] leading-relaxed text-[var(--txt-secondary)] mb-4">
+              Instantly log in to a pre-configured test account to bypass manual email registration.
+            </p>
+            {loginMsg && (
+              <div className="mb-3 text-[12px] font-semibold text-[var(--color-bloom)]">
+                {loginMsg}
+              </div>
+            )}
+            <button
+              className="gmj-btn gmj-btn-primary w-full py-3 text-[14px]"
+              onClick={handleQuickLogin}
+              disabled={loading}
+            >
+              🚀 Bypass Auth & Login
+            </button>
+          </div>
+        )}
+
         <div className="mb-6 rounded-[20px] bg-[var(--glass-bg)] border border-[var(--glass-border)] p-5">
           <div className="text-[12px] uppercase font-semibold tracking-wider text-[var(--txt-ghost)] mb-4">
             Dynamic profile stats
           </div>
-          <div className="grid grid-cols-2 gap-3 text-left">
-            <div>
-              <div className="text-[11px] text-[var(--txt-ghost)]">Username</div>
-              <div className="text-[14px] font-bold text-[var(--txt-primary)]">{profile?.username || "—"}</div>
+          {user ? (
+            <div className="grid grid-cols-2 gap-3 text-left">
+              <div>
+                <div className="text-[11px] text-[var(--txt-ghost)]">Username</div>
+                <div className="text-[14px] font-bold text-[var(--txt-primary)]">{profile?.username || "—"}</div>
+              </div>
+              <div>
+                <div className="text-[11px] text-[var(--txt-ghost)]">Total Shards</div>
+                <div className="text-[14px] font-bold text-[var(--color-arctic)]">⚡ {profile?.total_shards ?? 0}</div>
+              </div>
+              <div>
+                <div className="text-[11px] text-[var(--txt-ghost)]">Streak</div>
+                <div className="text-[14px] font-bold text-[var(--color-starlight)]">🔥 {profile?.current_streak ?? 0} days</div>
+              </div>
+              <div>
+                <div className="text-[11px] text-[var(--txt-ghost)]">Global Rank</div>
+                <div className="text-[14px] font-bold text-[var(--txt-primary)]">#{profile?.rank_position ?? "Unranked"}</div>
+              </div>
             </div>
-            <div>
-              <div className="text-[11px] text-[var(--txt-ghost)]">Total Shards</div>
-              <div className="text-[14px] font-bold text-[var(--color-arctic)]">⚡ {profile?.total_shards ?? 0}</div>
+          ) : (
+            <div className="text-center text-[13px] py-2 text-[var(--txt-ghost)] font-medium">
+              🔒 Log in to view and edit profile stats
             </div>
-            <div>
-              <div className="text-[11px] text-[var(--txt-ghost)]">Streak</div>
-              <div className="text-[14px] font-bold text-[var(--color-starlight)]">🔥 {profile?.current_streak ?? 0} days</div>
-            </div>
-            <div>
-              <div className="text-[11px] text-[var(--txt-ghost)]">Global Rank</div>
-              <div className="text-[14px] font-bold text-[var(--txt-primary)]">#{profile?.rank_position ?? "Unranked"}</div>
-            </div>
-          </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-3 mb-6">
@@ -290,10 +364,10 @@ function DebugDashboard() {
           <button
             className="gmj-btn gmj-btn-ghost text-left flex justify-between items-center"
             onClick={handleResetStats}
-            disabled={loading}
+            disabled={loading || !user}
           >
             <span>🔄 Reset My Current Stats</span>
-            <span className="text-[11px] text-[var(--color-coral)]">Danger</span>
+            <span className="text-[11px] text-[var(--color-coral)]">{user ? "Danger" : "Requires Login"}</span>
           </button>
 
           <button
@@ -309,14 +383,14 @@ function DebugDashboard() {
             <button
               className="gmj-btn gmj-btn-outline flex-1 text-[13px] py-3.5"
               onClick={() => handleAddShards(150)}
-              disabled={loading}
+              disabled={loading || !user}
             >
               ⚡ Add +150 Shards
             </button>
             <button
               className="gmj-btn gmj-btn-outline flex-1 text-[13px] py-3.5"
               onClick={() => handleAddShards(1500)}
-              disabled={loading}
+              disabled={loading || !user}
             >
               👑 Add +1500 Shards
             </button>

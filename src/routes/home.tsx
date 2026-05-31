@@ -6,6 +6,17 @@ import { useAuthContext } from "@/lib/auth-context";
 import { useProfile } from "@/hooks/use-profile";
 import { supabase } from "@/lib/supabase";
 import { getOrCreateDailyScenario, getLocalDateString, hasPlayedScenario, getScenarioSessionCount } from "@/lib/game-service";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
+
 
 export const Route = createFileRoute("/home")({
   loader: async () => {
@@ -32,6 +43,7 @@ function Home() {
   const [sessionsToday, setSessionsToday] = useState<number | null>(null);
   const [loadingChallenge, setLoadingChallenge] = useState(true);
   const [timeLeft, setTimeLeft] = useState("");
+  const [showConfirmEarly, setShowConfirmEarly] = useState(false);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -211,9 +223,8 @@ function Home() {
               </p>
             </div>
           ) : (
-            <Link
-              to="/scenario"
-              search={{ date: getLocalDateString(1), early: "true" }}
+            <div
+              onClick={() => setShowConfirmEarly(true)}
               className="gmj-glass gmj-float gmj-float-d4 mb-4 block p-5 cursor-pointer relative overflow-hidden transition-all duration-200 active:scale-[0.97]"
               style={{
                 border: "1px solid var(--glass-border)",
@@ -244,7 +255,7 @@ function Home() {
                 <span className="text-[12px] text-[var(--color-starlight)]">⚡ 50% points (or wait {timeLeft} for full points)</span>
                 <span className="text-[13px] font-bold tracking-wide text-[var(--color-spark)]">Tap to start →</span>
               </div>
-            </Link>
+            </div>
           )
         ) : (
           <div
@@ -268,7 +279,42 @@ function Home() {
         )}
       </div>
 
+      <AlertDialog open={showConfirmEarly} onOpenChange={setShowConfirmEarly}>
+        <AlertDialogContent className="bg-[var(--glass-bg)] border border-[var(--glass-border)] text-left rounded-[24px] max-w-[90%] sm:max-w-md" style={{ backdropFilter: "blur(24px)", boxShadow: "0 20px 50px rgba(0,0,0,0.5)" }}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="gmj-heading text-[20px] text-[var(--txt-primary)] flex items-center gap-2">
+              <span>⚠️</span> Play Tomorrow Early?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[14px] leading-relaxed text-[var(--txt-secondary)] mt-2">
+              You are unlocking tomorrow's daily scenario ahead of time.
+              <br /><br />
+              - **Reward**: You will receive **50% points (75 ⚡)** for a correct answer.
+              <br />
+              - **Alternative**: Wait **{timeLeft}** until local midnight to play it for the full **150 ⚡** reward.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex flex-col gap-2 mt-4 sm:flex-row sm:justify-end">
+            <AlertDialogCancel 
+              className="gmj-btn gmj-btn-outline w-full sm:w-auto border-[var(--glass-border)] hover:bg-[rgba(255,255,255,0.05)] text-[var(--txt-ghost)] animate-none"
+              onClick={() => setShowConfirmEarly(false)}
+            >
+              Wait till tomorrow
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              className="gmj-btn gmj-btn-primary w-full sm:w-auto"
+              onClick={() => {
+                setShowConfirmEarly(false);
+                navigate({ to: "/scenario", search: { date: tomorrowDateStr, early: "true" } });
+              }}
+            >
+              Play now (+75 ⚡)
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <BottomNav />
     </PhoneFrame>
   );
 }
+
