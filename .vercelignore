@@ -1,0 +1,14 @@
+# Ignore local lockfiles of other package managers
+pnpm-lock.yaml
+pnpm-workspace.yaml
+bun.lock
+bunfig.toml
+
+# Ignore build artifacts
+dist
+.vercel
+node_modules
+
+# Ignore local environment files
+.env.local
+.env.*.local
