@@ -4,7 +4,7 @@ import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
 
 export const Route = createFileRoute("/onboarding")({
   component: Onboarding,
-  head: () => ({ meta: [{ title: "GMJ — Welcome" }] }),
+  head: () => ({ meta: [{ title: "Nuance — Welcome" }] }),
 });
 
 const slides = [

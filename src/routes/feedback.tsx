@@ -1,19 +1,78 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
+import { getScenarioFeedbackFn } from "../server/ai";
+import { useAuthContext } from "@/lib/auth-context";
+import { useProfile } from "@/hooks/use-profile";
+import { useEffect, useRef, useState } from "react";
+import { recordSession } from "@/lib/game-service";
 
-const searchSchema = z.object({ correct: z.number().optional().default(1) });
+const searchSchema = z.object({ 
+  correct: z.number().optional().default(1),
+  premise: z.string().optional(),
+  choice: z.string().optional(),
+  scenarioId: z.string().optional(),
+  choiceIndex: z.number().optional(),
+  responseTimeMs: z.number().optional(),
+  early: z.number().optional().default(0)
+});
 
 export const Route = createFileRoute("/feedback")({
   component: Feedback,
   validateSearch: searchSchema,
-  head: () => ({ meta: [{ title: "GMJ — Feedback" }] }),
+  loaderDeps: ({ search: { correct, premise, choice, scenarioId, choiceIndex, responseTimeMs, early } }) => 
+    ({ correct, premise, choice, scenarioId, choiceIndex, responseTimeMs, early }),
+  loader: async ({ deps }) => {
+    if (!deps.premise || !deps.choice) return { feedback: null };
+    const feedback = await getScenarioFeedbackFn({ 
+      premise: deps.premise,
+      choice: deps.choice,
+      isCorrect: deps.correct === 1
+    });
+    return { feedback };
+  },
+  head: () => ({ meta: [{ title: "Nuance — Feedback" }] }),
 });
 
 function Feedback() {
   const navigate = useNavigate();
-  const { correct } = Route.useSearch();
+  const { correct, scenarioId, choiceIndex, responseTimeMs, early } = Route.useSearch();
+  const { feedback } = Route.useLoaderData();
   const isCorrect = correct === 1;
+
+  const { user } = useAuthContext();
+  const { profile, refetch: refetchProfile } = useProfile(user?.id);
+  const streak = profile?.current_streak ?? 0;
+
+  const hasSavedRef = useRef(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!user || !scenarioId || choiceIndex === undefined || responseTimeMs === undefined) return;
+    if (hasSavedRef.current) return;
+    hasSavedRef.current = true;
+
+    const saveSession = async () => {
+      setSaving(true);
+      try {
+        await recordSession(
+          user.id,
+          scenarioId,
+          choiceIndex,
+          isCorrect,
+          early === 1,
+          responseTimeMs
+        );
+        await refetchProfile();
+      } catch (err) {
+        console.error("Failed to record session:", err);
+      } finally {
+        setSaving(false);
+      }
+    };
+
+    saveSession();
+  }, [user, scenarioId, choiceIndex, isCorrect, early, responseTimeMs, refetchProfile]);
 
   const color = isCorrect ? "var(--color-bloom)" : "var(--color-coral)";
   const icon = isCorrect ? (
@@ -26,6 +85,8 @@ function Feedback() {
       <line x1="6" y1="6" x2="18" y2="18"></line>
     </svg>
   );
+
+  const displayPoints = isCorrect ? (early === 1 ? "+75" : "+150") : "+0";
 
   return (
     <PhoneFrame>
@@ -56,26 +117,33 @@ function Feedback() {
           {isCorrect ? "Sharp." : "Missed it."}
         </div>
         
-        <div className="gmj-stat-num gmj-float gmj-float-d3 mb-8 text-[48px]" style={{ color: "var(--txt-primary)" }}>
-          {isCorrect ? "+150" : "+0"} <span className="text-[20px] text-[var(--txt-ghost)]">pts</span>
+        <div className="gmj-stat-num gmj-float gmj-float-d3 mb-2 text-[48px]" style={{ color: "var(--txt-primary)" }}>
+          {saving ? "..." : displayPoints} <span className="text-[20px] text-[var(--txt-ghost)]">⚡</span>
         </div>
+
+        {isCorrect && (early === 1 ? (
+          <div className="gmj-float gmj-float-d3 mb-8 text-[12px] font-semibold text-[var(--color-spark)]">
+            ⚠️ Early play 50% multiplier applied (Wait for tomorrow to get 150 ⚡)
+          </div>
+        ) : (
+          <div className="gmj-float gmj-float-d3 mb-8 text-[12px] font-semibold text-[var(--color-bloom)]">
+            ✨ Regular play 100% points rewarded!
+          </div>
+        ))}
 
         <div className="gmj-glass gmj-float gmj-float-d4 mb-8 w-full px-6 py-5 text-left">
           <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--txt-ghost)]">
             {isCorrect ? "Why you're right" : "What you missed"}
           </div>
           <p className="text-[15px] leading-[1.6] text-[var(--txt-primary)]">
-            The argument commits a <strong className="text-[var(--color-spark)] font-semibold">false cause fallacy</strong> — it cites "studies"
-            without specifying them, then draws a conclusion that contradicts most actual research.
-            Studies on multitasking consistently show it <em className="text-[var(--color-starlight)] not-italic font-medium">reduces</em> cognitive performance,
-            not increases it. The phrasing is designed to sound authoritative.
+            {feedback || (isCorrect ? "Correct answer! Excellent logic." : "Incorrect answer. Watch out for fallacies.")}
           </p>
         </div>
 
         <div className="gmj-float gmj-float-d4 mb-8 flex items-center gap-2">
           <div className="gmj-streak">
             <span>🔥</span>
-            <span>8 day streak — keep going</span>
+            <span>{streak} day streak — keep going</span>
           </div>
         </div>
 

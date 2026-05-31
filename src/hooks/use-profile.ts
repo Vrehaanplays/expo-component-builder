@@ -17,20 +17,47 @@ export function useProfile(userId: string | undefined) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!userId) { setLoading(false); return; }
+  const fetchProfile = async () => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error: err } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-      .then(({ data, error: err }) => {
-        if (err) setError(err.message);
-        else setProfile(data as Profile);
-        setLoading(false);
-      });
+      if (err) {
+        setError(err.message);
+        setProfile(null);
+      } else if (data) {
+        const profileData = data as Profile;
+
+        // Dynamically compute the global leaderboard rank by counting profiles with more shards
+        const { count, error: countErr } = await supabase
+          .from('profiles')
+          .select('*', { count: 'exact', head: true })
+          .gt('total_shards', profileData.total_shards);
+
+        if (!countErr) {
+          profileData.rank_position = (count !== null ? count + 1 : 1);
+        }
+
+        setProfile(profileData);
+      }
+    } catch (e: any) {
+      setError(e.message || 'An error occurred fetching profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
   }, [userId]);
 
-  return { profile, loading, error };
+  return { profile, loading, error, refetch: fetchProfile };
 }

@@ -7,7 +7,7 @@ export const Route = createFileRoute("/")({
   component: Splash,
   head: () => ({
     meta: [
-      { title: "GMJ — Train your judgment" },
+      { title: "Nuance — Train your judgment" },
       { name: "description", content: "Outthink the room. A gamified social reasoning app." },
     ],
   }),
@@ -42,12 +42,12 @@ function Splash() {
               boxShadow: "0 8px 32px rgba(74,234,220,0.35)",
             }}
           >
-            G
+            N
           </div>
         </div>
 
         <div className="text-center">
-          <h1 className="gmj-display text-[36px]">GMJ</h1>
+          <h1 className="gmj-display text-[36px]">Nuance</h1>
           <p className="mt-2 text-[15px] tracking-wide text-[var(--text-secondary)]">
             Train your judgment.
           </p>

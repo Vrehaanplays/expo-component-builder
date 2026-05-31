@@ -1,13 +1,14 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
 import { BottomNav } from "@/components/BottomNav";
 import { useAuthContext } from "@/lib/auth-context";
 import { useProfile } from "@/hooks/use-profile";
+import { getRankTier } from "@/lib/game-service";
 
 export const Route = createFileRoute("/profile")({
   component: Profile,
-  head: () => ({ meta: [{ title: "GMJ — Profile" }] }),
+  head: () => ({ meta: [{ title: "Nuance — Profile" }] }),
 });
 
 function Profile() {
@@ -58,8 +59,10 @@ function Profile() {
           <div className="gmj-heading text-[22px] text-[var(--txt-primary)]">
             {isLoading ? "—" : (profile?.username ?? user?.email?.split("@")[0] ?? "—")}
           </div>
-          <div className="mt-1 text-[13px] font-medium text-[var(--txt-ghost)]">
-            {isLoading ? "—" : profile?.rank_position ? `Rank #${profile.rank_position} globally` : "Unranked"}
+          <div className="mt-1 flex items-center gap-1.5 text-[13px] font-medium text-[var(--txt-ghost)]">
+            <span>{isLoading ? "—" : getRankTier(profile?.total_shards ?? 0)}</span>
+            <span>•</span>
+            <span>{isLoading ? "—" : profile?.rank_position ? `Rank #${profile.rank_position}` : "Unranked"}</span>
           </div>
         </div>
       </div>
@@ -79,8 +82,8 @@ function Profile() {
         ))}
       </div>
 
-      {/* Sign out */}
-      <div className="mx-5 mb-4">
+      {/* Sign out + Debug */}
+      <div className="mx-5 mb-4 flex flex-col gap-3">
         <button
           id="profile-signout"
           className="gmj-btn gmj-btn-outline w-full"
@@ -89,6 +92,12 @@ function Profile() {
         >
           Sign out
         </button>
+        <Link
+          to="/debug"
+          className="text-center text-[12px] font-semibold text-[var(--txt-ghost)] hover:text-[var(--color-spark)] underline mt-2"
+        >
+          ⚙️ Open Testing Dashboard
+        </Link>
       </div>
 
       <div className="flex-1" />

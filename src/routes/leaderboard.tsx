@@ -3,18 +3,14 @@ import { useState } from "react";
 import { PhoneFrame, StatusBar } from "@/components/PhoneFrame";
 import { BottomNav } from "@/components/BottomNav";
 
+import { useLeaderboard } from "@/hooks/use-leaderboard";
+import { useAuthContext } from "@/lib/auth-context";
+import { useProfile } from "@/hooks/use-profile";
+
 export const Route = createFileRoute("/leaderboard")({
   component: Leaderboard,
-  head: () => ({ meta: [{ title: "GMJ — Leaderboard" }] }),
+  head: () => ({ meta: [{ title: "Nuance — Leaderboard" }] }),
 });
-
-const rows = [
-  { rank: 1, name: "n_karim", initials: "NK", streak: 21, score: 9240, medal: "gold" as const },
-  { rank: 2, name: "arjun_s", initials: "AS", streak: 14, score: 8810, medal: "silver" as const },
-  { rank: 3, name: "zara_k", initials: "ZK", streak: 9, score: 7990, medal: "bronze" as const },
-  { rank: 4, name: "m_ravi", initials: "MR", streak: 6, score: 6720 },
-  { rank: 5, name: "p_lee", initials: "PL", streak: 4, score: 5440 },
-];
 
 const medalColors: Record<string, string> = {
   gold: "#FFD700",
@@ -24,6 +20,9 @@ const medalColors: Record<string, string> = {
 
 function Leaderboard() {
   const [tab, setTab] = useState<"today" | "all">("today");
+  const { leaderboard, loading: leaderboardLoading } = useLeaderboard(tab);
+  const { user } = useAuthContext();
+  const { profile } = useProfile(user?.id);
 
   return (
     <PhoneFrame>
@@ -51,66 +50,75 @@ function Leaderboard() {
 
       <div className="flex-1 overflow-y-auto px-5 pb-5">
         <div className="gmj-glass gmj-float gmj-float-d1 overflow-hidden">
-          {rows.map((r, i) => (
-            <div key={r.rank} className="flex items-center gap-4 border-b border-[var(--color-border)] px-4 py-3 last:border-b-0">
-              <div
-                className="w-6 text-center font-mono text-[14px] font-bold"
-                style={{ color: r.medal ? medalColors[r.medal] : "var(--txt-ghost)" }}
-              >
-                {r.rank}
+          {leaderboardLoading ? (
+            <div className="p-4 text-center text-[var(--txt-ghost)]">Loading...</div>
+          ) : leaderboard.map((r, i) => {
+            const rank = i + 1;
+            const medal = rank === 1 ? "gold" : rank === 2 ? "silver" : rank === 3 ? "bronze" : null;
+            const initials = r.username ? r.username.slice(0, 2).toUpperCase() : "??";
+            return (
+              <div key={r.id} className="flex items-center gap-4 border-b border-[var(--color-border)] px-4 py-3 last:border-b-0">
+                <div
+                  className="w-6 text-center font-mono text-[14px] font-bold"
+                  style={{ color: medal ? medalColors[medal] : "var(--txt-ghost)" }}
+                >
+                  {rank}
+                </div>
+                <div
+                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] text-[14px] font-bold"
+                  style={{
+                    background: medal
+                      ? `${medalColors[medal]}1f`
+                      : "rgba(255,255,255,0.06)",
+                    color: medal ? medalColors[medal] : "var(--txt-primary)",
+                    border: medal ? `1px solid ${medalColors[medal]}40` : "1px solid rgba(255,255,255,0.1)",
+                  }}
+                >
+                  {initials}
+                </div>
+                <div className="flex-1">
+                  <div className="text-[15px] font-semibold text-[var(--txt-primary)]">{r.username || 'Anonymous'}</div>
+                  <div className="mt-0.5 text-[12px] text-[var(--txt-ghost)]">🔥 {r.current_streak} streak</div>
+                </div>
+                <div className="gmj-stat-num text-[16px]">
+                  {(r.total_shards || 0).toLocaleString()}
+                </div>
               </div>
-              <div
-                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] text-[14px] font-bold"
-                style={{
-                  background: r.medal
-                    ? `${medalColors[r.medal]}1f`
-                    : "rgba(255,255,255,0.06)",
-                  color: r.medal ? medalColors[r.medal] : "var(--txt-primary)",
-                  border: r.medal ? `1px solid ${medalColors[r.medal]}40` : "1px solid rgba(255,255,255,0.1)",
-                }}
-              >
-                {r.initials}
-              </div>
-              <div className="flex-1">
-                <div className="text-[15px] font-semibold text-[var(--txt-primary)]">{r.name}</div>
-                <div className="mt-0.5 text-[12px] text-[var(--txt-ghost)]">🔥 {r.streak} streak</div>
-              </div>
-              <div className="gmj-stat-num text-[16px]">
-                {r.score.toLocaleString()}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        <div
-          className="gmj-float gmj-float-d2 mt-4 flex items-center gap-4 rounded-[16px] border px-4 py-3.5 shadow-[0_8px_32px_rgba(74,234,220,0.15)]"
-          style={{
-            background: "rgba(74,234,220,0.08)",
-            backdropFilter: "blur(12px)",
-            borderColor: "rgba(74,234,220,0.25)",
-          }}
-        >
-          <div className="w-6 text-center font-mono text-[14px] font-bold text-[var(--color-arctic)]">
-            142
-          </div>
+        {profile && (
           <div
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] text-[14px] font-bold"
-            style={{ 
-              background: "rgba(74,234,220,0.15)", 
-              color: "var(--color-arctic)",
-              border: "1px solid rgba(74,234,220,0.3)"
+            className="gmj-float gmj-float-d2 mt-4 flex items-center gap-4 rounded-[16px] border px-4 py-3.5 shadow-[0_8px_32px_rgba(74,234,220,0.15)]"
+            style={{
+              background: "rgba(74,234,220,0.08)",
+              backdropFilter: "blur(12px)",
+              borderColor: "rgba(74,234,220,0.25)",
             }}
           >
-            YO
+            <div className="w-6 text-center font-mono text-[14px] font-bold text-[var(--color-arctic)]">
+              {profile.rank_position || "-"}
+            </div>
+            <div
+              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] text-[14px] font-bold"
+              style={{ 
+                background: "rgba(74,234,220,0.15)", 
+                color: "var(--color-arctic)",
+                border: "1px solid rgba(74,234,220,0.3)"
+              }}
+            >
+              {profile.username ? profile.username.slice(0, 2).toUpperCase() : "??"}
+            </div>
+            <div className="flex-1">
+              <div className="text-[15px] font-bold text-[var(--color-arctic)]">you</div>
+              <div className="mt-0.5 text-[12px] text-[var(--color-arctic)] opacity-80">🔥 {profile.current_streak} streak</div>
+            </div>
+            <div className="gmj-stat-num text-[16px] text-[var(--color-arctic)]">
+              {(profile.total_shards || 0).toLocaleString()}
+            </div>
           </div>
-          <div className="flex-1">
-            <div className="text-[15px] font-bold text-[var(--color-arctic)]">you</div>
-            <div className="mt-0.5 text-[12px] text-[var(--color-arctic)] opacity-80">🔥 8 streak</div>
-          </div>
-          <div className="gmj-stat-num text-[16px] text-[var(--color-arctic)]">
-            4,820
-          </div>
-        </div>
+        )}
       </div>
 
       <BottomNav />
