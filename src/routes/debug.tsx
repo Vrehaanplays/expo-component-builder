@@ -92,7 +92,7 @@ $$ language plpgsql security definer;`;function DebugDashboard() {
     setLoginMsg("Attempting quick login...");
     setLoading(true);
     try {
-      const testEmail = "tester@gmj.com";
+      const testEmail = "tester_verified@gmj.com";
       const testPass = "password123";
       
       const { error } = await supabase.auth.signInWithPassword({

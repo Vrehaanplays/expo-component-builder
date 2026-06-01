@@ -1,18 +1,17 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Groq } from 'groq-sdk';
 
-const getEnv = (key: string) => {
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return (import.meta.env[key] as string) || '';
-  }
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env[key] || '';
-  }
-  return '';
-};
+const geminiKey =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GEMINI_API_KEY) ||
+  (typeof process !== 'undefined' && process.env?.VITE_GEMINI_API_KEY) ||
+  (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) ||
+  '';
 
-const geminiKey = getEnv('GEMINI_API_KEY') || getEnv('VITE_GEMINI_API_KEY') || '';
-const groqKey = getEnv('GROQ_API_KEY') || getEnv('VITE_GROQ_API_KEY') || '';
+const groqKey =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_GROQ_API_KEY) ||
+  (typeof process !== 'undefined' && process.env?.VITE_GROQ_API_KEY) ||
+  (typeof process !== 'undefined' && process.env?.GROQ_API_KEY) ||
+  '';
 
 const genAI = new GoogleGenerativeAI(geminiKey);
 const groq = new Groq({ apiKey: groqKey, dangerouslyAllowBrowser: true });
