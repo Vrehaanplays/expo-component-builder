@@ -13,14 +13,39 @@ export function useLeaderboard(tab: 'today' | 'all') {
       setError(null);
       try {
         if (tab === 'all') {
-          const { data, error: err } = await supabase
+          let response = await supabase
             .from('profiles')
             .select('*')
-            .order('total_shards', { ascending: false })
+            .order('acuity_score', { ascending: false })
             .limit(50);
 
-          if (err) throw err;
-          setLeaderboard(data as Profile[]);
+          if (response.error) {
+            console.warn('Leaderboard acuity_score sort failed, falling back to total_shards:', response.error.message);
+            response = await supabase
+              .from('profiles')
+              .select('*')
+              .order('total_shards', { ascending: false })
+              .limit(50);
+          }
+
+          if (response.error) throw response.error;
+
+          const profilesList = (response.data || []).map((p: any) => {
+            const depth = p.total_depth || 0;
+            const acuity = p.acuity_score || (p.total_shards + depth);
+            return {
+              ...p,
+              total_depth: depth,
+              acuity_score: acuity,
+              // Overwrite total_shards display in leaderboard with acuity_score
+              total_shards: acuity
+            };
+          });
+
+          // Re-sort locally in case we fell back to total_shards and local acuity calculation changed the rank order
+          profilesList.sort((a, b) => b.total_shards - a.total_shards);
+
+          setLeaderboard(profilesList as Profile[]);
         } else {
           // Today's local date start timezone-agnostic query
           const startOfToday = new Date();

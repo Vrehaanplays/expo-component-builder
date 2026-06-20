@@ -14,10 +14,13 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as GymRouteImport } from './routes/gym'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as DebugRouteImport } from './routes/debug'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GymSessionRouteImport } from './routes/gym_.session'
+import { Route as GymEvalRouteImport } from './routes/gym_.eval'
 
 const ScenarioRoute = ScenarioRouteImport.update({
   id: '/scenario',
@@ -44,6 +47,11 @@ const HomeRoute = HomeRouteImport.update({
   path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GymRoute = GymRouteImport.update({
+  id: '/gym',
+  path: '/gym',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FeedbackRoute = FeedbackRouteImport.update({
   id: '/feedback',
   path: '/feedback',
@@ -64,28 +72,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GymSessionRoute = GymSessionRouteImport.update({
+  id: '/gym_/session',
+  path: '/gym/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GymEvalRoute = GymEvalRouteImport.update({
+  id: '/gym_/eval',
+  path: '/gym/eval',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/debug': typeof DebugRoute
   '/feedback': typeof FeedbackRoute
+  '/gym': typeof GymRoute
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/scenario': typeof ScenarioRoute
+  '/gym/eval': typeof GymEvalRoute
+  '/gym/session': typeof GymSessionRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/debug': typeof DebugRoute
   '/feedback': typeof FeedbackRoute
+  '/gym': typeof GymRoute
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/scenario': typeof ScenarioRoute
+  '/gym/eval': typeof GymEvalRoute
+  '/gym/session': typeof GymSessionRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -93,11 +117,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/debug': typeof DebugRoute
   '/feedback': typeof FeedbackRoute
+  '/gym': typeof GymRoute
   '/home': typeof HomeRoute
   '/leaderboard': typeof LeaderboardRoute
   '/onboarding': typeof OnboardingRoute
   '/profile': typeof ProfileRoute
   '/scenario': typeof ScenarioRoute
+  '/gym_/eval': typeof GymEvalRoute
+  '/gym_/session': typeof GymSessionRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -106,33 +133,42 @@ export interface FileRouteTypes {
     | '/auth'
     | '/debug'
     | '/feedback'
+    | '/gym'
     | '/home'
     | '/leaderboard'
     | '/onboarding'
     | '/profile'
     | '/scenario'
+    | '/gym/eval'
+    | '/gym/session'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/debug'
     | '/feedback'
+    | '/gym'
     | '/home'
     | '/leaderboard'
     | '/onboarding'
     | '/profile'
     | '/scenario'
+    | '/gym/eval'
+    | '/gym/session'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/debug'
     | '/feedback'
+    | '/gym'
     | '/home'
     | '/leaderboard'
     | '/onboarding'
     | '/profile'
     | '/scenario'
+    | '/gym_/eval'
+    | '/gym_/session'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -140,11 +176,14 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DebugRoute: typeof DebugRoute
   FeedbackRoute: typeof FeedbackRoute
+  GymRoute: typeof GymRoute
   HomeRoute: typeof HomeRoute
   LeaderboardRoute: typeof LeaderboardRoute
   OnboardingRoute: typeof OnboardingRoute
   ProfileRoute: typeof ProfileRoute
   ScenarioRoute: typeof ScenarioRoute
+  GymEvalRoute: typeof GymEvalRoute
+  GymSessionRoute: typeof GymSessionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -184,6 +223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gym': {
+      id: '/gym'
+      path: '/gym'
+      fullPath: '/gym'
+      preLoaderRoute: typeof GymRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/feedback': {
       id: '/feedback'
       path: '/feedback'
@@ -212,6 +258,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gym_/session': {
+      id: '/gym_/session'
+      path: '/gym/session'
+      fullPath: '/gym/session'
+      preLoaderRoute: typeof GymSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gym_/eval': {
+      id: '/gym_/eval'
+      path: '/gym/eval'
+      fullPath: '/gym/eval'
+      preLoaderRoute: typeof GymEvalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -220,11 +280,14 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DebugRoute: DebugRoute,
   FeedbackRoute: FeedbackRoute,
+  GymRoute: GymRoute,
   HomeRoute: HomeRoute,
   LeaderboardRoute: LeaderboardRoute,
   OnboardingRoute: OnboardingRoute,
   ProfileRoute: ProfileRoute,
   ScenarioRoute: ScenarioRoute,
+  GymEvalRoute: GymEvalRoute,
+  GymSessionRoute: GymSessionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

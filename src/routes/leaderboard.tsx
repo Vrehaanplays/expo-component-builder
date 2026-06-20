@@ -24,6 +24,11 @@ function Leaderboard() {
   const { user } = useAuthContext();
   const { profile } = useProfile(user?.id);
 
+  const todayRank = leaderboard.findIndex((r) => r.id === user?.id) + 1;
+  const displayRank = tab === "today"
+    ? (todayRank > 0 ? todayRank : "-")
+    : (profile?.rank_position || "-");
+
   return (
     <PhoneFrame>
       <StatusBar />
@@ -98,7 +103,7 @@ function Leaderboard() {
             }}
           >
             <div className="w-6 text-center font-mono text-[14px] font-bold text-[var(--color-arctic)]">
-              {profile.rank_position || "-"}
+              {displayRank}
             </div>
             <div
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] text-[14px] font-bold"
@@ -115,7 +120,7 @@ function Leaderboard() {
               <div className="mt-0.5 text-[12px] text-[var(--color-arctic)] opacity-80">🔥 {profile.current_streak} streak</div>
             </div>
             <div className="gmj-stat-num text-[16px] text-[var(--color-arctic)]">
-              {(profile.total_shards || 0).toLocaleString()}
+              {(tab === "all" ? (profile.acuity_score ?? profile.total_shards) : (profile.total_shards || 0)).toLocaleString()}
             </div>
           </div>
         )}

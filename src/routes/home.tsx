@@ -16,6 +16,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { Lock, Unlock, CheckCircle2, ArrowRight } from "lucide-react";
 
 
 export const Route = createFileRoute("/home")({
@@ -44,6 +45,7 @@ function Home() {
   const [loadingChallenge, setLoadingChallenge] = useState(true);
   const [timeLeft, setTimeLeft] = useState("");
   const [showConfirmEarly, setShowConfirmEarly] = useState(false);
+  const [showPointsInfo, setShowPointsInfo] = useState(false);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -106,15 +108,16 @@ function Home() {
           <span className="text-[14px]">🔥</span>
           <span>{isLoading ? "—" : `${streak} day streak`}</span>
         </div>
-        <div className="text-right">
-          <div className="gmj-stat-num text-[22px]">
-            {isLoading ? "—" : shards.toLocaleString()}
-          </div>
-          <div className="gmj-stat-label">Total ⚡</div>
-        </div>
+        <button
+          onClick={() => setShowPointsInfo(true)}
+          className="flex items-center gap-1.5 border border-[rgba(245,217,126,0.18)] bg-[rgba(245,217,126,0.08)] rounded-full px-3.5 py-1.5 font-mono text-[13px] font-medium text-[var(--accent-starlight)] transition-all duration-150 active:scale-[0.95] hover:bg-[rgba(245,217,126,0.12)] cursor-pointer outline-none"
+        >
+          <span className="text-[14px]">⚡</span>
+          <span>{isLoading ? "—" : `${shards.toLocaleString()} shards`}</span>
+        </button>
       </header>
 
-      <div className="flex-1 overflow-hidden px-5">
+      <div className="flex-1 overflow-y-auto px-5 pb-6">
         <div className="gmj-float gmj-float-d2 mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--color-spark)]">
           Today's challenge
         </div>
@@ -208,18 +211,14 @@ function Home() {
                   boxShadow: "0 2px 12px rgba(52,211,153,0.4)"
                 }}
               />
-              <div
-                className="gmj-tag mb-4"
-                style={{
-                  background: "rgba(52,211,153,0.15)",
-                  borderColor: "rgba(52,211,153,0.3)",
-                  color: "var(--color-bloom)",
-                }}
-              >
-                ✅ Completed tomorrow early
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[rgba(52,211,153,0.12)] border border-[rgba(52,211,153,0.25)] text-[var(--color-bloom)]">
+                  <CheckCircle2 size={14} />
+                </div>
+                <span className="text-[12px] font-bold uppercase tracking-[0.06em] text-[var(--color-bloom)]">Completed tomorrow early</span>
               </div>
               <p className="text-[14px] leading-relaxed text-[var(--txt-secondary)]">
-                You've already played tomorrow's scenario. Next challenge unlocks in <strong className="text-[var(--txt-primary)] font-mono">{timeLeft}</strong>.
+                You've locked in tomorrow's early reward. The next new scenario unlocks in <span className="text-[var(--txt-primary)] font-mono font-bold">{timeLeft}</span>.
               </p>
             </div>
           ) : (
@@ -238,42 +237,45 @@ function Home() {
                   boxShadow: "0 2px 12px rgba(167,139,250,0.4)"
                 }}
               />
-              <div
-                className="gmj-tag mb-4"
-                style={{
-                  background: "rgba(167,139,250,0.15)",
-                  borderColor: "rgba(167,139,250,0.3)",
-                  color: "var(--color-spark)",
-                }}
-              >
-                🔓 Play tomorrow early
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[rgba(167,139,250,0.12)] border border-[rgba(167,139,250,0.25)] text-[var(--color-spark)]">
+                  <Unlock size={14} />
+                </div>
+                <span className="text-[12px] font-bold uppercase tracking-[0.06em] text-[var(--color-spark)]">Play tomorrow early</span>
               </div>
-              <p className="text-[14px] leading-relaxed text-[var(--txt-primary)] mb-4">
+              <p className="text-[14px] leading-relaxed text-[var(--txt-primary)]">
                 Get tomorrow's scenario right now. Keep sharpening your logic.
               </p>
-              <div className="flex items-center justify-between">
-                <span className="text-[12px] text-[var(--color-starlight)]">⚡ 50% points (or wait {timeLeft} for full points)</span>
-                <span className="text-[13px] font-bold tracking-wide text-[var(--color-spark)]">Tap to start →</span>
+              <div className="mt-4 flex items-center justify-between border-t border-[rgba(255,255,255,0.06)] pt-3.5">
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[11px] text-[var(--txt-ghost)] uppercase tracking-wider font-semibold">Reward Multiplier</span>
+                  <span className="text-[13px] font-medium text-[var(--color-spark)]">⚡ 75 shards <span className="text-[var(--txt-ghost)] text-[12px]">(-50%)</span></span>
+                </div>
+                <div className="flex items-center gap-1.5 text-[var(--color-spark)] font-semibold text-[14px]">
+                  <span>Unlock early</span>
+                  <ArrowRight size={16} />
+                </div>
               </div>
             </div>
           )
         ) : (
           <div
-            className="gmj-glass gmj-float gmj-float-d4 p-5"
-            style={{ opacity: 0.5, pointerEvents: "none" }}
+            className="gmj-glass gmj-float gmj-float-d4 p-5 relative overflow-hidden"
+            style={{
+              opacity: 0.6,
+              pointerEvents: "none",
+              border: "1px solid rgba(255,255,255,0.08)",
+              boxShadow: "none"
+            }}
           >
-            <div
-              className="gmj-tag mb-4"
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                borderColor: "rgba(255,255,255,0.1)",
-                color: "var(--txt-ghost)",
-              }}
-            >
-              🔒 More tomorrow
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-[var(--txt-ghost)]">
+                <Lock size={14} />
+              </div>
+              <span className="text-[12px] font-bold uppercase tracking-[0.06em] text-[var(--txt-ghost)]">More tomorrow</span>
             </div>
             <p className="text-[14px] leading-relaxed text-[var(--txt-secondary)]">
-              Complete today's challenge to unlock tomorrow's early play. Unlocks in <strong className="font-mono">{timeLeft}</strong>.
+              Complete today's challenge to unlock early play. Next scenario ready in <span className="font-mono font-bold text-[var(--txt-primary)]">{timeLeft}</span>.
             </p>
           </div>
         )}
@@ -308,6 +310,70 @@ function Home() {
               }}
             >
               Play now (+75 ⚡)
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showPointsInfo} onOpenChange={setShowPointsInfo}>
+        <AlertDialogContent className="bg-[var(--glass-bg)] border border-[var(--glass-border)] text-left rounded-[24px] max-w-[90%] sm:max-w-md overflow-hidden" style={{ backdropFilter: "blur(24px)", boxShadow: "0 20px 50px rgba(0,0,0,0.5)" }}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="gmj-heading text-[20px] text-[var(--accent-starlight)] flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(245,217,126,0.12)] border border-[rgba(245,217,126,0.25)] text-xs">⚡</span> 
+              <span>How Shards Work</span>
+            </AlertDialogTitle>
+            <div className="text-[14px] leading-relaxed text-[var(--txt-secondary)] mt-3 space-y-4">
+              <p>
+                Shards (⚡) are the currency of rational debate. Collect them to build your reputation and advance your tier.
+              </p>
+              <div className="space-y-2.5 border-t border-[rgba(255,255,255,0.06)] pt-3">
+                <div className="flex justify-between items-center text-[13px]">
+                  <span className="text-[var(--txt-primary)] font-semibold">🧩 Daily Challenge Correct</span>
+                  <span className="font-mono text-[var(--accent-bloom)] font-bold">+150 ⚡</span>
+                </div>
+                <div className="flex justify-between items-center text-[13px]">
+                  <span className="text-[var(--txt-primary)] font-semibold">⚠️ Play Tomorrow Early</span>
+                  <span className="font-mono text-[var(--color-spark)] font-bold">+75 ⚡</span>
+                </div>
+              </div>
+              
+              <div className="border-t border-[rgba(255,255,255,0.06)] pt-3">
+                <span className="text-[11px] font-bold text-[var(--txt-ghost)] uppercase tracking-wider block mb-2">Rank Progression</span>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 font-mono text-[12px]">
+                  <div className="flex justify-between border-b border-[rgba(255,255,255,0.04)] pb-0.5">
+                    <span className="text-[var(--txt-ghost)]">Initiate</span>
+                    <span className="text-[var(--txt-primary)]">0+</span>
+                  </div>
+                  <div className="flex justify-between border-b border-[rgba(255,255,255,0.04)] pb-0.5">
+                    <span className="text-[var(--txt-ghost)]">Steelmanner</span>
+                    <span className="text-[var(--txt-primary)]">1.5k+</span>
+                  </div>
+                  <div className="flex justify-between border-b border-[rgba(255,255,255,0.04)] pb-0.5">
+                    <span className="text-[var(--txt-ghost)]">Analyst</span>
+                    <span className="text-[var(--txt-primary)]">500+</span>
+                  </div>
+                  <div className="flex justify-between border-b border-[rgba(255,255,255,0.04)] pb-0.5">
+                    <span className="text-[var(--txt-ghost)]">Dialectician</span>
+                    <span className="text-[var(--txt-primary)]">3k+</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[var(--txt-ghost)]">Rationalist</span>
+                    <span className="text-[var(--txt-primary)]">6k+</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[var(--txt-ghost)]">Grandmaster</span>
+                    <span className="text-[var(--txt-primary)]">10k+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogAction 
+              className="gmj-btn gmj-btn-primary w-full"
+              onClick={() => setShowPointsInfo(false)}
+            >
+              Understand
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

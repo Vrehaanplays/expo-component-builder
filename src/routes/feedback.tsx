@@ -6,6 +6,7 @@ import { useAuthContext } from "@/lib/auth-context";
 import { useProfile } from "@/hooks/use-profile";
 import { useEffect, useRef, useState } from "react";
 import { recordSession } from "@/lib/game-service";
+import { StreamingText } from "@/components/StreamingText";
 
 const searchSchema = z.object({ 
   correct: z.number().optional().default(1),
@@ -135,8 +136,11 @@ function Feedback() {
           <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.1em] text-[var(--txt-ghost)]">
             {isCorrect ? "Why you're right" : "What you missed"}
           </div>
-          <p className="text-[15px] leading-[1.6] text-[var(--txt-primary)]">
-            {feedback || (isCorrect ? "Correct answer! Excellent logic." : "Incorrect answer. Watch out for fallacies.")}
+          <p className="text-[15px] leading-[1.6] text-[var(--txt-primary)] min-h-[60px]">
+            <StreamingText
+              text={feedback || (isCorrect ? "Correct answer! Excellent logic." : "Incorrect answer. Watch out for fallacies.")}
+              speed={20}
+            />
           </p>
         </div>
 
